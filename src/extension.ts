@@ -73,7 +73,7 @@ const loadPathsFromTSConfig = (
 export function activate(context: ExtensionContext) {
     const storageUri = context.storageUri || context.globalStorageUri;
     if (!storageUri || !storageUri.fsPath) {
-        throw new Error('The extension "vscode-gutter-preview" can not work without access to the storage!');
+        throw new Error('The extension "vscode-image-preview" can not work without access to the storage!');
     }
 
     let serverModule = context.asAbsolutePath(path.join('dist', 'server.js'));

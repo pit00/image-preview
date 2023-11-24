@@ -133,32 +133,6 @@ export function imageDecorator(
                             imagePath = vscode.Uri.file(imagePath).toString();
                         }
 
-                        if (hasOpenFileCommand && isLocalFile(item.originalImagePath)) {
-                            const uri = vscode.Uri.file(item.originalImagePath);
-                            const args = [uri];
-                            const openFileCommandUrl = vscode.Uri.parse(
-                                `command:revealInExplorer?${encodeURIComponent(JSON.stringify(args))}`
-                            );
-                            const browseFileCommandUrl = vscode.Uri.parse(
-                                `command:revealFileInOS?${encodeURIComponent(JSON.stringify(args))}`
-                            );
-                            result += `  \r\n[Reveal in Side Bar](${openFileCommandUrl} "Reveal in Side Bar")`;
-                            result += `  \r\n`;
-                            result += `  \r\n[Open Containing Folder](${browseFileCommandUrl} "Open Containing Folder")`;
-                        }
-
-                        if (dimensions?.height && dimensions?.width) {
-                            result += `  \r\n${dimensions.width}x${dimensions.height}`;
-                        }
-
-                        if (size) {
-                            result += `  \r\n${size}`;
-                        }
-
-                        if (result.length > 0) {
-                            result += `\r\n\r\n`;
-                        }
-
                         let maxSizeConfig = '';
                         if (maxWidth > 0) {
                             maxSizeConfig = `|width=${maxWidth}`;
@@ -166,6 +140,30 @@ export function imageDecorator(
                             maxSizeConfig = `|height=${maxHeight}`;
                         }
                         result += `![${imagePath}](${imagePath}${maxSizeConfig})`;
+
+                        if (dimensions?.height && dimensions?.width) {
+                            result += `\r\n\r\n${dimensions.width}x${dimensions.height}`;
+                        }
+                        if (size) {
+                            result += ` [${size}]`;
+                        }
+
+                        if (hasOpenFileCommand && isLocalFile(item.originalImagePath)) {
+                            const uri = vscode.Uri.file(item.originalImagePath);
+                            const args = [uri];
+                            /* const openFileCommandUrl = vscode.Uri.parse(
+                                `command:revealInExplorer?${encodeURIComponent(JSON.stringify(args))}`
+                            ); */
+                            const browseFileCommandUrl = vscode.Uri.parse(
+                                `command:revealFileInOS?${encodeURIComponent(JSON.stringify(args))}`
+                            );
+                            const openImageCommandUrl = vscode.Uri.parse(
+                                `command:vscode.open?${encodeURIComponent(JSON.stringify(args))}`
+                            );
+                            // result += `\r\n[🔎 Reveal in Side Bar](${openFileCommandUrl} "Reveal in Side Bar")`;
+                            result += `\r\n\r\n[🖼️ Image](${openImageCommandUrl} "Open Image") | `;
+                            result += `[📁 Folder](${browseFileCommandUrl} "Open Folder")`;
+                        }
 
                         const contents = new vscode.MarkdownString(result);
                         contents.isTrusted = true;
