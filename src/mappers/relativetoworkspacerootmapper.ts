@@ -1,4 +1,3 @@
-import * as url from 'url';
 import * as path from 'path';
 import * as fs from 'fs';
 
@@ -16,7 +15,7 @@ class RelativeToWorkspaceRootFileUrlMapper implements AbsoluteUrlMapper {
 
         if (this.workspaceFolder) {
             let rootPath = path.normalize(this.workspaceFolder);
-            const pathName = path.normalize(imagePath);
+            const pathName = path.normalize(imagePath).replace(/\\/g, '/');
             if (pathName) {
                 const pathsToTest = [pathName];
                 if (this.paths['']) {

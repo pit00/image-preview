@@ -4,6 +4,10 @@ Shows image preview in the gutter and on hover
 
 ### Change Log
 
+- 1.1
+    - Path with space fix
+    - Hover markdown fix
+    - Update until 0.31.2
 - 1.0
     - Hover panel changes and features
 - Forked at 0.30.0

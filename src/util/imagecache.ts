@@ -48,7 +48,7 @@ export const ImageCache = {
                 }
                 const tempFile = tmp.fileSync({
                     tmpdir: storagePath,
-                    postfix: absoluteImageUrl.path ? path.parse(absoluteImageUrl.path).ext : 'png',
+                    postfix: absoluteImageUrl.path ? path.parse(absoluteImageUrl.path).ext : '.png',
                 });
                 const filePath = tempFile.name;
                 const promise = new Promise<string>((resolve, reject) => {
@@ -109,7 +109,9 @@ export const ImageCache = {
                 const injected = promise.then((p) => injectStyles(p));
                 ImageCache.set(absoluteImagePath, injected);
                 return injected;
-            } catch (error) {}
+            } catch (error) {
+                return Promise.reject(error);
+            }
         }
     },
 
