@@ -135,23 +135,26 @@ export function imageDecorator(
                         if (hasOpenFileCommand && isLocalFile(item.originalImagePath)) {
                             const uri = vscode.Uri.file(item.originalImagePath);
                             const args = [uri];
-                            const openFileCommandUrl = vscode.Uri.parse(
-                                `command:revealInExplorer?${encodeURIComponent(JSON.stringify(args))}`,
+                            const openImageCommandUrl = vscode.Uri.parse(
+                                `command:vscode.open?${encodeURIComponent(JSON.stringify(args))}`
                             );
                             const browseFileCommandUrl = vscode.Uri.parse(
                                 `command:revealFileInOS?${encodeURIComponent(JSON.stringify(args))}`,
                             );
-                            result += `\r\n[Reveal in Side Bar](${openFileCommandUrl} "Reveal in Side Bar") | `;
-                            // result += `  \r\n`;
-                            result += `[📁 Folder](${browseFileCommandUrl} "Open Folder")`;
+                            const openFileCommandUrl = vscode.Uri.parse(
+                                `command:revealInExplorer?${encodeURIComponent(JSON.stringify(args))}`,
+                            );
+                            result += `\r\n[🖼️ Image](${openImageCommandUrl} "Open Image") | `;
+                            result += `[📁 Folder](${browseFileCommandUrl} "Open Folder") | `;
+                            result += `[🔍 Sidebar](${openFileCommandUrl} "Reveal in Side Bar")`;
                         }
 
                         if (dimensions?.height && dimensions?.width) {
-                            result += `  \r\n${dimensions.width}x${dimensions.height}`;
+                            result += `\r\n\r\n${dimensions.width}x${dimensions.height}`;
                         }
 
                         if (size) {
-                            result += `  \r\n${size}`;
+                            result += ` [${size}]`;
                         }
 
                         if (result.length > 0) {
@@ -164,7 +167,11 @@ export function imageDecorator(
                         } else if (maxHeight > 0) {
                             maxSizeConfig = `|height=${maxHeight}`;
                         }
-                        result += `![${imagePath}](${imagePath}${maxSizeConfig})`;
+                        
+                        // console.log("CommandService#executeCommand [LOG] ", vscode.window.activeTextEditor?.document.languageId);
+                        if(vscode.window.activeTextEditor?.document.languageId != "markdown"){
+                            result += `![${imagePath}](${imagePath}${maxSizeConfig})`;
+                        }
 
                         const contents = new vscode.MarkdownString(result);
                         contents.isTrusted = true;
