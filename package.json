@@ -1,11 +1,11 @@
 {
-    "name": "vscode-image-preview-btn",
-    "description": "Shows image preview in the gutter and on hover, with additional buttons",
+    "name": "image-hover-tools",
+    "displayName": "Image Hover Tools",
+    "description": "Shows image on hover and gutter, include some button shorcuts",
     "author": "Pitu",
     "publisher": "pit00",
     "license": "MIT",
     "version": "1.1.1",
-    "displayName": "Image Preview Buttons",
     "icon": "images/logo.png",
     "engines": {
         "vscode": "^1.88.1"
