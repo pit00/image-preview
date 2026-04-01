@@ -1,9 +1,15 @@
 import * as fs from 'fs';
 import { filesize } from 'filesize';
 
-export function copyFile(source, target, cb) {
+export function copyFile(source: string, target: string, cb: (err?: any) => void) {
+    const fileSizeInBytes = fs.statSync(source).size;
+    const fileSizeInMegabytes = fileSizeInBytes / (1024 * 1024);
+    if (fileSizeInMegabytes > 20) {
+        done(new Error('Maximum file size of 20MB is exceeded'));
+        return;
+    }
     var cbCalled = false;
-
+    
     var rd = fs.createReadStream(source);
     rd.on('error', function (err) {
         done(err);
@@ -16,7 +22,7 @@ export function copyFile(source, target, cb) {
         done();
     });
     rd.pipe(wr);
-
+    
     function done(err?) {
         if (!cbCalled) {
             cb(err);
@@ -31,7 +37,7 @@ export function getFilesize(source: string): Promise<string> {
             if (err) {
                 return reject(err);
             }
-
+            
             return resolve(filesize(info.size, { standard: 'jedec' }));
         });
     });

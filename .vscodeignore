@@ -17,3 +17,4 @@ webpack.config.js
 !images
 !dist/extension.js
 !dist/server.js
+*.vsix

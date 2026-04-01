@@ -5,7 +5,7 @@
     "author": "Pitu",
     "publisher": "pit00",
     "license": "MIT",
-    "version": "1.1.1",
+    "version": "1.1.2",
     "icon": "images/logo.png",
     "engines": {
         "vscode": "^1.88.1"
@@ -35,6 +35,15 @@
                     "scope": "resource",
                     "description": "Additional folder to consider when resolving relative urls",
                     "type": "string"
+                },
+                "gutterpreview.sourceFolders": {
+                    "default": [
+                        "static",
+                        "public"
+                    ],
+                    "scope": "resource",
+                    "description": "Additional folders to consider when resolving relative urls",
+                    "type": "array"
                 },
                 "gutterpreview.imagePreviewMaxHeight": {
                     "default": "100",

@@ -24,6 +24,7 @@ import { nonNullOrEmpty, nonHttpOnly } from '../util/stringutil';
 import { ImageCache } from '../util/imagecache';
 import { UrlMatch } from '../recognizers/recognizer';
 import { URI } from 'vscode-uri';
+import { replaceCurrentColorInDataURI } from '../util/currentColorHelper';
 
 let connection: Connection = createConnection(new IPCMessageReader(process), new IPCMessageWriter(process));
 
@@ -92,14 +93,14 @@ async function collectEntries(
     let items = [];
     ImageCache.setCurrentColor(request.currentColor);
     absoluteUrlMappers.forEach((absoluteUrlMapper) =>
-        absoluteUrlMapper.refreshConfig(request.workspaceFolder, request.additionalSourcefolder, request.paths),
+        absoluteUrlMapper.refreshConfig(request.workspaceFolder, request.additionalSourcefolders, request.paths),
     );
-
+    
     const configuration = await connection.workspace.getConfiguration({
         scopeUri: document.uri,
         section: 'gutterpreview',
     });
-
+    
     const urlDetectionPatterns = configuration.urlDetectionPatterns
         .map((pattern: string) => {
             try {
@@ -107,8 +108,9 @@ async function collectEntries(
             } catch {} // Illegal regular expression strings are ignored.
         })
         .filter((p: RegExp | undefined) => !!p);
-
+        
     const lines = document.getText().split(/\r\n|\r|\n/);
+    let relativeImageDir = '';
     for (const lineIndex of request.visibleLines) {
         var line = lines[lineIndex];
         if (!line) continue;
@@ -116,7 +118,10 @@ async function collectEntries(
         if (line.length > 20000) {
             continue;
         }
-
+        
+        if (line.startsWith(':imagesdir:')) {
+            relativeImageDir = line.substring(':imagesdir:'.length).trim();
+        }
         recognizers
             .map((recognizer) => {
                 if (cancellationToken.isCancellationRequested) return;
@@ -142,18 +147,22 @@ async function collectEntries(
                     let absoluteUrls = absoluteUrlMappers
                         .map((mapper) => {
                             try {
-                                return mapper.map(request.fileName, urlMatch.url);
+                                return mapper.map(request.fileName, urlMatch.url, { relativeImageDir });
                             } catch (e) {}
                         })
                         .filter((item) => nonNullOrEmpty(item) && nonHttpOnly(item));
-
+                        
                     let absoluteUrlsSet = new Set(absoluteUrls);
-
+                    
                     items = items.concat(
                         Array.from(absoluteUrlsSet.values()).map((absoluteImagePath) => {
                             const result =
-                                convertToLocalImagePath(absoluteImagePath, urlMatch, urlDetectionPatterns) ||
-                                Promise.resolve(null);
+                                convertToLocalImagePath(
+                                    absoluteImagePath,
+                                    urlMatch,
+                                    urlDetectionPatterns,
+                                    request.currentColor,
+                                ) || Promise.resolve(null);
                             return result.catch((p) => null);
                         }),
                     );
@@ -166,12 +175,13 @@ async function convertToLocalImagePath(
     absoluteImagePath: string,
     urlMatch: UrlMatch,
     urlDetectionPatterns: RegExp[] = [],
+    currentColor: string,
 ): Promise<ImageInfo> {
     if (absoluteImagePath) {
         let isDataUri = absoluteImagePath.indexOf('data:image') == 0;
         let isExtensionSupported: boolean;
         let isPatternSupported: boolean;
-
+        
         if (!isDataUri) {
             const absoluteImageUrl = URI.parse(absoluteImagePath);
             if (absoluteImageUrl && absoluteImageUrl.path) {
@@ -184,18 +194,18 @@ async function convertToLocalImagePath(
                 }
             }
         }
-
+        
         const start = Position.create(urlMatch.lineIndex, urlMatch.start);
         const end = Position.create(urlMatch.lineIndex, urlMatch.end);
         const range = { start, end };
-
+        
         absoluteImagePath = absoluteImagePath.replace(/\|(width=\d*)?(height=\d*)?/gm, '');
-
+        
         if (isDataUri || isExtensionSupported || isPatternSupported) {
             if (isDataUri) {
                 return Promise.resolve({
                     originalImagePath: absoluteImagePath,
-                    imagePath: absoluteImagePath,
+                    imagePath: replaceCurrentColorInDataURI(absoluteImagePath, currentColor),
                     range,
                 });
             } else {

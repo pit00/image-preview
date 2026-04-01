@@ -1,13 +1,13 @@
 # Image Hover Tools
 
-Fork of [Image preview](https://github.com/kisstkondoros/gutter-preview) at version 0.30.0
+Fork of [Image preview](https://github.com/kisstkondoros/gutter-preview)
 
 Shows image on hover and gutter, include some button shorcuts
 
 ### Change Log
 
 - 1.2
-    -
+    - Update until 0.32.2
 - 1.1
     - Path with space fix (need more testing)
     - Image preview ignored on markdown case
